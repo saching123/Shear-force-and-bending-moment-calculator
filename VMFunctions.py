@@ -41,18 +41,7 @@ def get_load_cases_data(load_case):
             input("Enter the horizontal distance in m of the moment from the left end of the beam: "))
         return list([load_case, magnitude, point_of_action, 0, 0])
 
-    if load_case == 'CL':
-        start_magnitude = float(input("Enter the magnitude at the start of combined loading\
-        in N (+ve distribution upwards, -ve downwards): "))
-        cl_start = float(input("Enter the horizontal distance in m to the start of CL from \
-        the left end of the beam: "))
-        end_magnitude = float(input("Enter the magnitude at the end of combined loading in N\
-        (+ve distribution upwards, -ve downwards): "))
-        cl_end = float(input("Enter the horizontal distance in m to the end of CL from the left\
-        end of the beam: "))
-        return list([load_case, start_magnitude, cl_start, end_magnitude, cl_end])
-
-
+    
 # Statics - calculate reactions
 def calculate_reactions(beam_span, load_set):
     sum_of_forces = 0
@@ -76,17 +65,6 @@ def calculate_reactions(beam_span, load_set):
             sum_of_forces += uvl_load
             moment_arm_uvl = (e[2] + ((2 / 3) * uvl_span))
             sum_of_moments += uvl_load * moment_arm_uvl
-
-        elif e[0] == 'CL':
-            udl_span = e[4] - e[2]
-            udl_load = e[1] * udl_span
-            uvl_load = 0.5 * udl_span * (e[3] - e[1])  # udl_span = uvl_span
-            sum_of_forces += udl_load + uvl_load
-            moment_arm_udl = (e[2] + e[4]) / 2
-            udl_moment = udl_load * moment_arm_udl
-            moment_arm_uvl = e[2] + ((2 / 3) * udl_span)
-            uvl_moment = uvl_load * moment_arm_uvl
-            sum_of_moments += udl_moment + uvl_moment
 
         elif e[0] == 'PM':
             sum_of_moments += e[1]
@@ -132,25 +110,6 @@ def calculate_shear_force_UVL(load_set, i, sum_of_forces, shear_forces_list, spa
 
     x1 = np.linspace(load_set[i][3], load_set[i + 1][2], 5, endpoint=True)
     sum_of_forces[0:-1] = sum_of_forces[-1]
-    shear_forces_list.extend(sum_of_forces)
-    span_values_list.extend(x1)
-
-
-# To be checked
-def calculate_shear_force_CL(load_set, i, sum_of_forces, shear_forces_list, span_values_list):
-    x = np.linspace(load_set[i][2], load_set[i][4], 1000, endpoint=True)
-    base = x - load_set[i][2]
-    udl_load = load_set[i][1] * base
-    uvl_span = load_set[i][4] - load_set[i][2]
-    uvlHeight = load_set[i][3] - load_set[i][1]
-    height = (base / uvl_span) * uvlHeight
-    uvl_load = 0.5 * base * height
-    sum_of_forces += udl_load + uvl_load
-    shear_forces_list.extend(sum_of_forces)
-    span_values_list.extend(x)
-
-    x1 = np.linspace(load_set[i][4], load_set[i + 1][2], 1000, endpoint=True)
-    sum_of_forces = sum_of_forces[-1] * np.ones(1000)
     shear_forces_list.extend(sum_of_forces)
     span_values_list.extend(x1)
 
